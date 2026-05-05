@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>簡單計算機</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --page-bg: #e8e6df;
+            --app-bg: #f8f7f2;
+            --display-bg: #f2f1eb;
+            --key-bg: #d6c9c7; 
+            --key-text: #ffffff;
+            --gold: #b3a58e;
+            --milktea: #917c79; 
+            --text-main: #6b6a66;
+            --card-bg: #f2f1eb;
+            --shadow: rgba(0,0,0,0.1);
+        }
+
+        [data-theme="dark"] {
+            color-scheme: dark;
+            --page-bg: #1a1b1d;
+            --app-bg: #212224;
+            --display-bg: #2a2c2f;
+            --key-bg: #3a3d42; 
+            --key-text: #fefefe;
+            --gold: #d4b889;
+            --milktea: #917c79;
+            --text-main: #fefefe;
+            --card-bg: #2a2c2f;
+            --shadow: rgba(0,0,0,0.4);
+        }
+
+        body {
+            font-family: -apple-system, "Noto Sans CJK TC", sans-serif;
+            background-color: var(--page-bg);
+            margin: 0; padding: 40px 20px;
+            display: flex; 
+            flex-direction: column;
+            align-items: center; 
+            justify-content: flex-start;
+            min-height: 100vh;
+            transition: 0.3s;
+        }
+
+        .theme-switch-wrap { position: fixed; top: 20px; right: 20px; z-index: 100; }
+        .theme-btn {
+            background: var(--app-bg); border: 1px solid var(--gold);
+            color: var(--gold); border-radius: 20px;
+            padding: 6px 15px; cursor: pointer; font-size: 0.8rem;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+
+        .app-container {
+            width: 100%; max-width: 450px;
+            background-color: var(--app-bg);
+            border-radius: 40px; padding: 35px 25px;
+            box-shadow: 0 20px 50px var(--shadow);
+            border: 8px solid var(--display-bg);
+            box-sizing: border-box;
+        }
+
+        .display-area {
+            background-color: var(--display-bg);
+            border-radius: 20px; padding: 25px;
+            text-align: right; margin-bottom: 20px;
+        }
+
+        .display-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .display-header .label { 
+            color: var(--gold); 
+            font-size: 0.9rem; 
+            font-weight: bold;
+        }
+
+        /* 簡單計算機圓鈕 */
+        .link-circle {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background-color: var(--milktea);
+        border: 1.5px solid var(--milktea);
+        color: #ffffff;
+        text-decoration: none;
+        font-weight: bold;
+        font-size: 0.9rem;
+        transition: 0.3s;
+        margin-left: 5px;
+        }
+
+        .link-circle:hover {
+            background-color: var(--milktea);
+            color: #ffffff;
+        }
+
+        .switch-links {
+            display: flex;
+            gap: 6px;
+        }
+        .link-btn {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            border-radius: 15px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.2s;
+            border: 1px solid var(--milktea);
+        }
+	    .link-single {
+            background-color: #ffffff;
+            color: var(--milktea);
+        }
+        .link-multi {
+            background-color: #ffffff;
+            color: var(--milktea);
+        }
+        
+        .display-area .price-symbol { color: var(--gold); font-size: 1.8rem; margin-right: 5px; font-weight: bold; }
+        .display-area .price-val { color: var(--text-main); font-size: 4rem; font-weight: 700; }
+
+        .keypad {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(5, 60px);
+            gap: 12px;
+            margin-bottom: 5px;
+            grid-template-areas: 
+                "op1 op2 op3 op4"
+                "n7  n8  n9  bk"
+                "n4  n5  n6  btnC"
+                "n1  n2  n3  btnC"
+                "n0  n00 eq  btnC";
+        }
+
+        .key {
+            background-color: var(--key-bg); color: var(--key-text);
+            border: none; border-radius: 12px; height: 60px;
+            font-size: 1.4rem; cursor: pointer; font-weight: 600;
+            transition: 0.1s;
+        }
+        .key:active { transform: scale(0.95); opacity: 0.7; }
+
+        .key-op { background-color: var(--milktea) !important; font-size: 1.5rem; }
+        .key-n7 { grid-area: n7; } .key-n8 { grid-area: n8; } .key-n9 { grid-area: n9; }
+        .key-n4 { grid-area: n4; } .key-n5 { grid-area: n5; } .key-n6 { grid-area: n6; }
+        .key-n1 { grid-area: n1; } .key-n2 { grid-area: n2; } .key-n3 { grid-area: n3; }
+        .key-n0 { grid-area: n0; } .key-n00 { grid-area: n00; } 
+        .key-bk { grid-area: bk; color: var(--gold) !important; }
+        
+        .key-c { grid-area: btnC; height: 100%; background-color: #917c79 !important; font-size: 1.6rem; }
+        .key-eq { grid-area: eq; background-color: #a89a98 !important; font-size: 1.6rem; }
+
+        /* AP 連結區塊樣式 */
+        .promo-container {
+            width: 100%; max-width: 450px;
+            margin-top: 20px;
+            background-color: var(--app-bg);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 10px 30px var(--shadow);
+            text-align: center;
+            box-sizing: border-box;
+            border: 2px solid var(--display-bg);
+        }
+        .promo-text { color: var(--text-main); font-size: 0.85rem; margin-bottom: 12px; line-height: 1.4; }
+        .promo-btn {
+            display: inline-block;
+            background-color: var(--milktea);
+            color: #fff;
+            text-decoration: none;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: 0.3s;
+            box-shadow: 0 4px 10px var(--shadow);
+        }
+    </style>
+</head>
+<body>
+
+<div class="theme-switch-wrap">
+    <button class="theme-btn" onclick="toggleTheme()">◐</button>
+</div>
+
+<div class="app-container">
+    <div class="display-area">
+        <div class="display-header">
+            <div class="label">計算數值</div>
+            <div class="switch-links">
+                <a href="simple.html" class="link-circle" title="簡單計算機">±</a>
+                <a href="https://yumi773.github.io/readmoo-tools1/" class="link-btn link-multi">單本</a>
+                <a href="https://yumi773.github.io/readmoo-tools2/" class="link-btn link-single">多本</a>
+            </div>
+        </div>
+        <div><span class="price-symbol">$</span><span id="displayVal" class="price-val">0</span></div>
+    </div>
+
+    <div class="keypad">
+        <button class="key key-op" style="grid-area: op1;" onclick="pressOp('+')">+</button>
+        <button class="key key-op" style="grid-area: op2;" onclick="pressOp('-')">-</button>
+        <button class="key key-op" style="grid-area: op3;" onclick="pressOp('*')">×</button>
+        <button class="key key-op" style="grid-area: op4;" onclick="pressOp('/')">÷</button>
+
+        <button class="key key-n7" onclick="press('7')">7</button>
+        <button class="key key-n8" onclick="press('8')">8</button>
+        <button class="key key-n9" onclick="press('9')">9</button>
+        <button class="key key-c" onclick="cls()">C</button>
+
+        <button class="key key-n4" onclick="press('4')">4</button>
+        <button class="key key-n5" onclick="press('5')">5</button>
+        <button class="key key-n6" onclick="press('6')">6</button>
+
+        <button class="key key-n1" onclick="press('1')">1</button>
+        <button class="key key-n2" onclick="press('2')">2</button>
+        <button class="key key-n3" onclick="press('3')">3</button>
+
+        <button class="key key-n0" onclick="press('0')">0</button>
+        <button class="key key-n00" onclick="press('00')">00</button>
+        <button class="key key-bk" onclick="back()">⌫</button>
+        <button class="key key-eq" onclick="solve()">=</button>
+    </div>
+</div>
+
+<div class="promo-container">
+    <div class="promo-text" style="font-size: 0.8rem; margin-bottom: 10px;">喜歡這個計算機的話，歡迎用 AP 連結小小鼓勵我喔❤</div>
+    <a href="https://moo.im/a/clmtBW" target="_blank" class="promo-btn">AP 連結</a>
+</div>
+
+<script>
+    let currentInput = "0";
+
+    function applySystemTheme() {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        setTheme(prefersDark ? 'dark' : 'light');
+    }
+    function setTheme(theme) {
+        document.body.setAttribute('data-theme', theme);
+        document.body.style.colorScheme = theme;
+    }
+    function toggleTheme() {
+        const current = document.body.getAttribute('data-theme');
+        setTheme(current === 'dark' ? 'light' : 'dark');
+    }
+    applySystemTheme();
+
+    window.addEventListener('keydown', function(e) {
+        if (e.key >= '0' && e.key <= '9') press(e.key);
+        else if (e.key === '+') pressOp('+');
+        else if (e.key === '-') pressOp('-');
+        else if (e.key === '*') pressOp('*');
+        else if (e.key === '/') pressOp('/');
+        else if (e.key === 'Enter' || e.key === '=') solve();
+        else if (e.key === 'Backspace') back();
+        else if (e.key.toLowerCase() === 'c' || e.key === 'Escape'|| e.key === 'Delete') cls();
+    });
+
+    function press(n) {
+        if (currentInput === "0") currentInput = n;
+        else currentInput += n;
+        update();
+    }
+
+    function pressOp(op) {
+        const lastChar = currentInput.slice(-1);
+        if (['+', '-', '*', '/'].includes(lastChar)) {
+            currentInput = currentInput.slice(0, -1) + op;
+        } else {
+            currentInput += op;
+        }
+        update();
+    }
+
+    function solve() {
+        try {
+            let expr = currentInput.replace(/[+\-*/]$/, "");
+            let res = eval(expr);
+            // 處理除以 0 或 NaN 的情況
+            if (!isFinite(res)) {
+                currentInput = "Error";
+            } else {
+                // 四捨五入到整數，維持原本書價計算的簡潔感
+                currentInput = Math.round(res).toString();
+            }
+            update();
+        } catch (e) {
+            currentInput = "Error";
+            update();
+        }
+    }
+
+    function back() {
+        if (currentInput === "Error") {
+            cls();
+            return;
+        }
+        currentInput = currentInput.slice(0, -1);
+        if (currentInput === "") currentInput = "0";
+        update();
+    }
+
+    function cls() {
+        currentInput = "0"; 
+        update();
+    }
+
+    function update() { 
+        let showText = currentInput.replace(/\*/g, '×').replace(/\//g, '÷');
+        document.getElementById('displayVal').innerText = showText; 
+    }
+</script>
+</body>
+</html>
